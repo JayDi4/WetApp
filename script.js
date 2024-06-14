@@ -1,4 +1,5 @@
 let bets = [];
+let users = [];
 let currentBetType = null;
 
 function addJogi() {
@@ -6,6 +7,7 @@ function addJogi() {
     const jogiName = jogiInput.value.trim();
 
     if (jogiName) {
+        users.push({ name: jogiName, score: 0 });
         const jogiList = document.getElementById('jogiList');
         const newJogiDiv = document.createElement('div');
         newJogiDiv.textContent = jogiName;
@@ -15,6 +17,7 @@ function addJogi() {
         deleteButton.className = 'delete-button';
         deleteButton.onclick = () => {
             jogiList.removeChild(newJogiDiv);
+            users = users.filter(user => user.name !== jogiName);
         };
 
         newJogiDiv.appendChild(deleteButton);
@@ -88,14 +91,19 @@ function displayUserBetActions() {
     userBetActions.innerHTML = '';
 
     for (let jogiDiv of jogiList.children) {
+        const userName = jogiDiv.firstChild.textContent;
         const userActionDiv = document.createElement('div');
-        userActionDiv.textContent = jogiDiv.firstChild.textContent + ': ';
+        userActionDiv.textContent = userName + ': ';
 
         if (currentBetType === 'yesNo') {
             const yesButton = document.createElement('button');
             yesButton.textContent = 'Ja';
+            yesButton.onclick = () => handleYesNoClick(userName, 'Ja', yesButton, noButton);
+
             const noButton = document.createElement('button');
             noButton.textContent = 'Nein';
+            noButton.onclick = () => handleYesNoClick(userName, 'Nein', yesButton, noButton);
+
             userActionDiv.appendChild(yesButton);
             userActionDiv.appendChild(noButton);
         } else if (currentBetType === 'estimate') {
@@ -104,12 +112,39 @@ function displayUserBetActions() {
             estimateInput.placeholder = 'Schätzung';
             const confirmButton = document.createElement('button');
             confirmButton.textContent = '✓';
+            confirmButton.onclick = () => handleEstimateClick(userName, estimateInput, confirmButton);
+
             userActionDiv.appendChild(estimateInput);
             userActionDiv.appendChild(confirmButton);
         }
 
         userBetActions.appendChild(userActionDiv);
     }
+}
+
+function handleYesNoClick(userName, value, yesButton, noButton) {
+    users = users.map(user => {
+        if (user.name === userName) {
+            user.lastYesNo = value;
+        }
+        return user;
+    });
+
+    yesButton.disabled = true;
+    noButton.disabled = true;
+}
+
+function handleEstimateClick(userName, estimateInput, confirmButton) {
+    const estimateValue = estimateInput.value.trim();
+    users = users.map(user => {
+        if (user.name === userName) {
+            user.lastEstimate = parseFloat(estimateValue);
+        }
+        return user;
+    });
+
+    estimateInput.disabled = true;
+    confirmButton.disabled = true;
 }
 
 function displayResultActions() {
@@ -119,8 +154,12 @@ function displayResultActions() {
     if (currentBetType === 'yesNo') {
         const yesButton = document.createElement('button');
         yesButton.textContent = 'Ja';
+        yesButton.onclick = () => handleResultClick('Ja');
+
         const noButton = document.createElement('button');
         noButton.textContent = 'Nein';
+        noButton.onclick = () => handleResultClick('Nein');
+
         resultActions.appendChild(yesButton);
         resultActions.appendChild(noButton);
     } else if (currentBetType === 'estimate') {
@@ -129,9 +168,80 @@ function displayResultActions() {
         resultInput.placeholder = 'Ergebnis eingeben';
         const confirmButton = document.createElement('button');
         confirmButton.textContent = '✓';
+        confirmButton.onclick = () => handleEstimateResultClick(resultInput);
+
         resultActions.appendChild(resultInput);
         resultActions.appendChild(confirmButton);
     }
+}
+
+function handleResultClick(result) {
+    users = users.map(user => {
+        if (user.lastYesNo) {
+            if ((user.lastYesNo === 'Ja' && result === 'Nein') || (user.lastYesNo === 'Nein' && result === 'Ja')) {
+                user.score += 10;
+            }
+            delete user.lastYesNo;
+        }
+        return user;
+    });
+
+    updateResultsTable();
+}
+
+function handleEstimateResultClick(resultInput) {
+    const resultValue = parseFloat(resultInput.value.trim());
+
+    let closestUser = null;
+    let closestDifference = Infinity;
+
+    users.forEach(user => {
+        if (user.lastEstimate !== undefined) {
+            const difference = Math.abs(user.lastEstimate - resultValue);
+            if (difference < closestDifference) {
+                closestDifference = difference;
+                closestUser = user;
+            }
+        }
+    });
+
+    users = users.map(user => {
+        if (user !== closestUser) {
+            user.score += 10;
+        }
+        delete user.lastEstimate;
+        return user;
+    });
+
+    updateResultsTable();
+}
+
+function updateResultsTable() {
+    const resultsTable = document.getElementById('resultsTable');
+    resultsTable.innerHTML = '<h3>Ergebnisse</h3>';
+    const table = document.createElement('table');
+
+    const headerRow = document.createElement('tr');
+    const nameHeader = document.createElement('th');
+    nameHeader.textContent = 'Name';
+    const scoreHeader = document.createElement('th');
+    scoreHeader.textContent = 'Punkte';
+    headerRow.appendChild(nameHeader);
+    headerRow.appendChild(scoreHeader);
+    table.appendChild(headerRow);
+
+    users.forEach(user => {
+        const row = document.createElement('tr');
+        const nameCell = document.createElement('td');
+        nameCell.textContent = user.name;
+        const scoreCell = document.createElement('td');
+        scoreCell.textContent = user.score;
+        row.appendChild(nameCell);
+        row.appendChild(scoreCell);
+        table.appendChild(row);
+    });
+
+    resultsTable.appendChild(table);
 }
 
 function selectBet() {
