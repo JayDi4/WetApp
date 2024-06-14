@@ -17,6 +17,13 @@ button {
     cursor: pointer;
 }
 
+button.delete-button {
+    background-color: red;
+    color: white;
+    border: none;
+    margin-left: 5px;
+}
+
 #jogiList {
     margin-top: 20px;
 }
@@ -32,4 +39,8 @@ button {
 label {
     display: block;
     margin-top: 10px;
+}
+
+#resultSection {
+    margin-top: 20px;
 }

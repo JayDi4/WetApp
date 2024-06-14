@@ -7,9 +7,18 @@ function addJogi() {
 
     if (jogiName) {
         const jogiList = document.getElementById('jogiList');
-        const newJogiLabel = document.createElement('label');
-        newJogiLabel.textContent = jogiName;
-        jogiList.appendChild(newJogiLabel);
+        const newJogiDiv = document.createElement('div');
+        newJogiDiv.textContent = jogiName;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'x';
+        deleteButton.className = 'delete-button';
+        deleteButton.onclick = () => {
+            jogiList.removeChild(newJogiDiv);
+        };
+
+        newJogiDiv.appendChild(deleteButton);
+        jogiList.appendChild(newJogiDiv);
         jogiInput.value = '';
     } else {
         alert('Bitte geben Sie einen Namen ein.');
@@ -21,6 +30,7 @@ function createNewBet() {
     document.getElementById('yesNoButton').style.display = 'inline';
     document.getElementById('estimateButton').style.display = 'inline';
     document.getElementById('userBetActions').innerHTML = '';
+    document.getElementById('resultActions').innerHTML = '';
 }
 
 function placeYesNoBet() {
@@ -31,6 +41,7 @@ function placeYesNoBet() {
         addBetToDropdown(bet, true);
         currentBetType = 'yesNo';
         displayUserBetActions();
+        displayResultActions();
         betInput.value = '';
         hideBetInput();
     } else {
@@ -46,6 +57,7 @@ function placeEstimateBet() {
         addBetToDropdown(bet, false);
         currentBetType = 'estimate';
         displayUserBetActions();
+        displayResultActions();
         betInput.value = '';
         hideBetInput();
     } else {
@@ -75,9 +87,9 @@ function displayUserBetActions() {
     const userBetActions = document.getElementById('userBetActions');
     userBetActions.innerHTML = '';
 
-    for (let jogiLabel of jogiList.children) {
+    for (let jogiDiv of jogiList.children) {
         const userActionDiv = document.createElement('div');
-        userActionDiv.textContent = jogiLabel.textContent + ': ';
+        userActionDiv.textContent = jogiDiv.firstChild.textContent + ': ';
 
         if (currentBetType === 'yesNo') {
             const yesButton = document.createElement('button');
@@ -100,6 +112,28 @@ function displayUserBetActions() {
     }
 }
 
+function displayResultActions() {
+    const resultActions = document.getElementById('resultActions');
+    resultActions.innerHTML = '';
+
+    if (currentBetType === 'yesNo') {
+        const yesButton = document.createElement('button');
+        yesButton.textContent = 'Ja';
+        const noButton = document.createElement('button');
+        noButton.textContent = 'Nein';
+        resultActions.appendChild(yesButton);
+        resultActions.appendChild(noButton);
+    } else if (currentBetType === 'estimate') {
+        const resultInput = document.createElement('input');
+        resultInput.type = 'text';
+        resultInput.placeholder = 'Ergebnis eingeben';
+        const confirmButton = document.createElement('button');
+        confirmButton.textContent = '✓';
+        resultActions.appendChild(resultInput);
+        resultActions.appendChild(confirmButton);
+    }
+}
+
 function selectBet() {
     const betDropdown = document.getElementById('betDropdown');
     const selectedBet = betDropdown.options[betDropdown.selectedIndex].text;
@@ -108,5 +142,6 @@ function selectBet() {
     if (bet) {
         currentBetType = bet.isYesNo ? 'yesNo' : 'estimate';
         displayUserBetActions();
+        displayResultActions();
     }
 }
