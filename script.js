@@ -13,7 +13,7 @@ function addJogi() {
             return;
         }
 
-        users.push({ name: jogiName, score: 0, losses: {} });
+        users.push({ name: jogiName, score: 0 });
         const jogiList = document.getElementById('jogiList');
         const newItem = document.createElement('li');
 
@@ -62,7 +62,45 @@ function updateUserNames(oldName, newName) {
         return user;
     });
     updateResultsTable();
-    updateLossList();
+    updateUserList();
+}
+
+function updateUserList() {
+    const jogiList = document.getElementById('jogiList');
+    jogiList.innerHTML = '';
+
+    users.forEach(user => {
+        const newItem = document.createElement('li');
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = user.name;
+        
+        const editButton = document.createElement('button');
+        editButton.textContent = '🖉';
+        editButton.className = 'edit-button';
+        editButton.onclick = () => {
+            const newName = prompt('Neuer Name für ' + user.name, user.name);
+            if (newName && newName.trim() && !users.some(u => u.name === newName.trim())) {
+                updateUserNames(user.name, newName.trim());
+                nameSpan.textContent = newName.trim();
+            } else {
+                alert('Ungültiger oder bereits vorhandener Name.');
+            }
+        };
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'x';
+        deleteButton.className = 'delete-button';
+        deleteButton.onclick = () => {
+            jogiList.removeChild(newItem);
+            users = users.filter(u => u.name !== user.name);
+            updateResultsTable();
+        };
+
+        newItem.appendChild(nameSpan);
+        newItem.appendChild(editButton);
+        newItem.appendChild(deleteButton);
+        jogiList.appendChild(newItem);
+    });
 }
 
 function createNewBet() {
@@ -271,10 +309,6 @@ function handleResultClick(result, confirmButton) {
                 const betResult = result === 'Ja' ? 'Nein' : 'Ja';
                 if (user.lastYesNo === betResult) {
                     user.score += 10;
-                    if (!user.losses[betResult]) {
-                        user.losses[betResult] = 0;
-                    }
-                    user.losses[betResult] += 10;
                 }
                 delete user.lastYesNo;
             }
@@ -299,10 +333,6 @@ function handleResultClick(result, confirmButton) {
         users = users.map(user => {
             if (user !== closestUser) {
                 user.score += 10;
-                if (!user.losses[result.value.trim()]) {
-                    user.losses[result.value.trim()] = 0;
-                }
-                user.losses[result.value.trim()] += 10;
             }
             delete user.lastEstimate;
             return user;
@@ -348,69 +378,11 @@ function updateResultsTable() {
     } else {
         document.getElementById('resetScoresButton').style.display = 'none';
     }
-
-    updateLossList();
-}
-
-function updateLossList() {
-    const lossList = document.getElementById('lossList');
-    lossList.innerHTML = '<h3>Verluste</h3>';
-    const table = document.createElement('table');
-
-    const headerRow = document.createElement('tr');
-    const betHeader = document.createElement('th');
-    betHeader.textContent = 'Wette';
-    const leastLossHeader = document.createElement('th');
-    leastLossHeader.textContent = 'Am wenigsten verloren';
-    const mostLossHeader = document.createElement('th');
-    mostLossHeader.textContent = 'Am meisten verloren';
-    headerRow.appendChild(betHeader);
-    headerRow.appendChild(leastLossHeader);
-    headerRow.appendChild(mostLossHeader);
-    table.appendChild(headerRow);
-
-    bets.forEach(bet => {
-        const betRow = document.createElement('tr');
-        const betCell = document.createElement('td');
-        betCell.textContent = bet.text;
-        const leastLossCell = document.createElement('td');
-        const mostLossCell = document.createElement('td');
-
-        let leastLossUser = null;
-        let mostLossUser = null;
-        let leastLoss = Infinity;
-        let mostLoss = -Infinity;
-
-        users.forEach(user => {
-            const loss = user.losses[bet.text] || 0;
-
-            if (loss < leastLoss) {
-                leastLoss = loss;
-                leastLossUser = user;
-            }
-
-            if (loss > mostLoss) {
-                mostLoss = loss;
-                mostLossUser = user;
-            }
-        });
-
-        leastLossCell.textContent = leastLossUser ? `${leastLossUser.name}: ${(leastLoss * 0.01).toFixed(2)} €` : 'N/A';
-        mostLossCell.textContent = mostLossUser ? `${mostLossUser.name}: ${(mostLoss * 0.01).toFixed(2)} €` : 'N/A';
-
-        betRow.appendChild(betCell);
-        betRow.appendChild(leastLossCell);
-        betRow.appendChild(mostLossCell);
-        table.appendChild(betRow);
-    });
-
-    lossList.appendChild(table);
 }
 
 function resetScores() {
     users = users.map(user => {
         user.score = 0;
-        user.losses = {};
         return user;
     });
 
