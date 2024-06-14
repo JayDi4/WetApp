@@ -1,4 +1,5 @@
 let bets = [];
+let currentBetType = null;
 
 function addJogi() {
     const jogiInput = document.getElementById('jogiInput');
@@ -19,6 +20,7 @@ function createNewBet() {
     document.getElementById('betInput').style.display = 'inline';
     document.getElementById('yesNoButton').style.display = 'inline';
     document.getElementById('estimateButton').style.display = 'inline';
+    document.getElementById('userBetActions').innerHTML = '';
 }
 
 function placeYesNoBet() {
@@ -27,6 +29,8 @@ function placeYesNoBet() {
 
     if (bet) {
         addBetToDropdown(bet, true);
+        currentBetType = 'yesNo';
+        displayUserBetActions();
         betInput.value = '';
         hideBetInput();
     } else {
@@ -40,6 +44,8 @@ function placeEstimateBet() {
 
     if (bet) {
         addBetToDropdown(bet, false);
+        currentBetType = 'estimate';
+        displayUserBetActions();
         betInput.value = '';
         hideBetInput();
     } else {
@@ -62,4 +68,45 @@ function hideBetInput() {
     document.getElementById('betInput').style.display = 'none';
     document.getElementById('yesNoButton').style.display = 'none';
     document.getElementById('estimateButton').style.display = 'none';
+}
+
+function displayUserBetActions() {
+    const jogiList = document.getElementById('jogiList');
+    const userBetActions = document.getElementById('userBetActions');
+    userBetActions.innerHTML = '';
+
+    for (let jogiLabel of jogiList.children) {
+        const userActionDiv = document.createElement('div');
+        userActionDiv.textContent = jogiLabel.textContent + ': ';
+
+        if (currentBetType === 'yesNo') {
+            const yesButton = document.createElement('button');
+            yesButton.textContent = 'Ja';
+            const noButton = document.createElement('button');
+            noButton.textContent = 'Nein';
+            userActionDiv.appendChild(yesButton);
+            userActionDiv.appendChild(noButton);
+        } else if (currentBetType === 'estimate') {
+            const estimateInput = document.createElement('input');
+            estimateInput.type = 'text';
+            estimateInput.placeholder = 'Schätzung';
+            const confirmButton = document.createElement('button');
+            confirmButton.textContent = '✓';
+            userActionDiv.appendChild(estimateInput);
+            userActionDiv.appendChild(confirmButton);
+        }
+
+        userBetActions.appendChild(userActionDiv);
+    }
+}
+
+function selectBet() {
+    const betDropdown = document.getElementById('betDropdown');
+    const selectedBet = betDropdown.options[betDropdown.selectedIndex].text;
+    const bet = bets.find(b => b.text === selectedBet);
+
+    if (bet) {
+        currentBetType = bet.isYesNo ? 'yesNo' : 'estimate';
+        displayUserBetActions();
+    }
 }

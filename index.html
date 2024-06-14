@@ -20,9 +20,10 @@
         <button id="estimateButton" onclick="placeEstimateBet()" style="display: none;">Schätzung</button>
     </div>
     <div>
-        <select id="betDropdown" multiple style="width: 100%; margin-top: 20px;">
+        <select id="betDropdown" multiple style="width: 100%; margin-top: 20px;" onchange="selectBet()">
         </select>
     </div>
+    <div id="userBetActions"></div>
     <script src="script.js"></script>
 </body>
 </html>
