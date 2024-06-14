@@ -165,11 +165,11 @@ function displayResultActions() {
     if (currentBetType === 'yesNo') {
         const yesButton = document.createElement('button');
         yesButton.textContent = 'Ja';
-        yesButton.onclick = () => checkPendingVotes('Ja');
+        yesButton.onclick = () => checkPendingVotes('Ja', yesButton);
 
         const noButton = document.createElement('button');
         noButton.textContent = 'Nein';
-        noButton.onclick = () => checkPendingVotes('Nein');
+        noButton.onclick = () => checkPendingVotes('Nein', noButton);
 
         resultActions.appendChild(yesButton);
         resultActions.appendChild(noButton);
@@ -177,8 +177,12 @@ function displayResultActions() {
         const resultInput = document.createElement('input');
         resultInput.type = 'text';
         resultInput.placeholder = 'Ergebnis eingeben';
+        resultInput.oninput = () => {
+            confirmButton.disabled = resultInput.value.trim() === '';
+        };
         const confirmButton = document.createElement('button');
         confirmButton.textContent = '✓';
+        confirmButton.disabled = true;
         confirmButton.onclick = () => checkPendingVotes(resultInput, confirmButton);
 
         resultActions.appendChild(resultInput);
@@ -250,6 +254,7 @@ function handleResultClick(result, confirmButton) {
         confirmButton.disabled = true;
     }
 
+    confirmButton.disabled = true;
     updateResultsTable();
 }
 
