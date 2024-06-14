@@ -1,3 +1,5 @@
+let bets = [];
+
 function addJogi() {
     const jogiInput = document.getElementById('jogiInput');
     const jogiName = jogiInput.value.trim();
@@ -14,21 +16,19 @@ function addJogi() {
 }
 
 function createNewBet() {
-    const betSection = document.getElementById('betSection');
-    betSection.innerHTML = `
-        <input type="text" id="betInput" placeholder="Wette eingeben" title="Wette eingeben">
-        <button onclick="placeYesNoBet()">Ja/Nein</button>
-        <button onclick="placeEstimateBet()">Schätzung</button>
-    `;
+    document.getElementById('betInput').style.display = 'inline';
+    document.getElementById('yesNoButton').style.display = 'inline';
+    document.getElementById('estimateButton').style.display = 'inline';
 }
 
 function placeYesNoBet() {
     const betInput = document.getElementById('betInput');
     const bet = betInput.value.trim();
-    
+
     if (bet) {
-        alert(`Ja/Nein Wette: ${bet}`);
-        // Hier kann der Code für die Ja/Nein-Wette hinzugefügt werden.
+        addBetToDropdown(bet, true);
+        betInput.value = '';
+        hideBetInput();
     } else {
         alert('Bitte geben Sie eine Wette ein.');
     }
@@ -37,11 +37,29 @@ function placeYesNoBet() {
 function placeEstimateBet() {
     const betInput = document.getElementById('betInput');
     const bet = betInput.value.trim();
-    
+
     if (bet) {
-        alert(`Schätzungswette: ${bet}`);
-        // Hier kann der Code für die Schätzungswette hinzugefügt werden.
+        addBetToDropdown(bet, false);
+        betInput.value = '';
+        hideBetInput();
     } else {
         alert('Bitte geben Sie eine Wette ein.');
     }
+}
+
+function addBetToDropdown(bet, isYesNo) {
+    if (!bets.some(b => b.text === bet)) {
+        bets.push({ text: bet, isYesNo: isYesNo });
+
+        const betDropdown = document.getElementById('betDropdown');
+        const newOption = document.createElement('option');
+        newOption.textContent = bet;
+        betDropdown.appendChild(newOption);
+    }
+}
+
+function hideBetInput() {
+    document.getElementById('betInput').style.display = 'none';
+    document.getElementById('yesNoButton').style.display = 'none';
+    document.getElementById('estimateButton').style.display = 'none';
 }

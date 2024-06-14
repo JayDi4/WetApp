@@ -13,8 +13,16 @@
         <button onclick="addJogi()">Jogi hinzufügen</button>
     </div>
     <div id="jogiList"></div>
-    <button onclick="createNewBet()">Neue Wette</button>
-    <div id="betSection"></div>
+    <div class="bet-section">
+        <button onclick="createNewBet()">Neue Wette</button>
+        <input type="text" id="betInput" placeholder="Wette eingeben" title="Wette eingeben" style="display: none;">
+        <button id="yesNoButton" onclick="placeYesNoBet()" style="display: none;">Ja/Nein</button>
+        <button id="estimateButton" onclick="placeEstimateBet()" style="display: none;">Schätzung</button>
+    </div>
+    <div>
+        <select id="betDropdown" multiple style="width: 100%; margin-top: 20px;">
+        </select>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
