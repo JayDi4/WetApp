@@ -8,6 +8,11 @@ function addJogi() {
     const jogiName = jogiInput.value.trim();
 
     if (jogiName) {
+        if (users.some(user => user.name === jogiName)) {
+            alert('Benutzername bereits vorhanden.');
+            return;
+        }
+
         users.push({ name: jogiName, score: 0 });
         const jogiList = document.getElementById('jogiList');
         const newJogiDiv = document.createElement('div');
@@ -267,7 +272,7 @@ function updateResultsTable() {
     const nameHeader = document.createElement('th');
     nameHeader.textContent = 'Name';
     const scoreHeader = document.createElement('th');
-    scoreHeader.textContent = 'Punkte';
+    scoreHeader.textContent = 'Spende an die Kasse';
     headerRow.appendChild(nameHeader);
     headerRow.appendChild(scoreHeader);
     table.appendChild(headerRow);
@@ -277,7 +282,7 @@ function updateResultsTable() {
         const nameCell = document.createElement('td');
         nameCell.textContent = user.name;
         const scoreCell = document.createElement('td');
-        scoreCell.textContent = user.score;
+        scoreCell.textContent = (user.score / 10).toFixed(2) + ' €';
         row.appendChild(nameCell);
         row.appendChild(scoreCell);
         table.appendChild(row);
@@ -290,6 +295,41 @@ function updateResultsTable() {
     } else {
         document.getElementById('resetScoresButton').style.display = 'none';
     }
+
+    updateLossList();
+}
+
+function updateLossList() {
+    const lossList = document.getElementById('lossList');
+    lossList.innerHTML = '<h3>Verluste</h3>';
+    const lossEntries = users.map(user => {
+        const lossEntry = { name: user.name, totalLoss: 0 };
+
+        bets.forEach(bet => {
+            if (bet.isYesNo && user.lastYesNo) {
+                if ((user.lastYesNo === 'Ja' && bet.result === 'Nein') || (user.lastYesNo === 'Nein' && bet.result === 'Ja')) {
+                    lossEntry.totalLoss += 10;
+                }
+            } else if (!bet.isYesNo && user.lastEstimate !== undefined) {
+                if (Math.abs(user.lastEstimate - bet.result) > 0) {
+                    lossEntry.totalLoss += 10;
+                }
+            }
+        });
+
+        return lossEntry;
+    });
+
+    lossEntries.sort((a, b) => b.totalLoss - a.totalLoss);
+
+    const list = document.createElement('ul');
+    lossEntries.forEach(entry => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${entry.name}: ${(entry.totalLoss / 10).toFixed(2)} € verloren`;
+        list.appendChild(listItem);
+    });
+
+    lossList.appendChild(list);
 }
 
 function resetScores() {
