@@ -1,6 +1,8 @@
 body {
     font-family: Arial, sans-serif;
     margin: 20px;
+    text-align: center;
+    background-color: rgb(98, 188, 211);
 }
 
 h1 {
@@ -14,6 +16,8 @@ input, select {
 
 button {
     padding: 5px 10px;
+    margin-right: 20px;
+    margin-left: 20px;
     cursor: pointer;
 }
 
@@ -21,19 +25,45 @@ button.delete-button {
     background-color: red;
     color: white;
     border: none;
-    margin-left: 5px;
+}
+
+button.edit-button {
+    background-color: rgb(66, 66, 124);
+    color: white;
+    border: none;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 button[disabled] {
     cursor: not-allowed;
 }
 
-#jogiList {
+#jogiListContainer {
     margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+#jogiList {
+    list-style: none;
+    padding: 0;
+    width: 60%;
+    margin: 0 auto;
+}
+
+#jogiList li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    border: 1px solid #ddd;
+    margin-bottom: 5px;
 }
 
 .bet-section {
     margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .bet-section input, .bet-section button {
@@ -42,11 +72,60 @@ button[disabled] {
 
 label {
     display: block;
-    margin-top: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 #resultSection {
     margin-top: 20px;
+}
+
+#betDropdownContainer {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    width: calc(100% - 40px);
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+#betDropdown {
+    width: 100%;
+}
+
+table {
+    width: 80%;
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+#resultsTable {
+    margin-top: 20px;
+}
+
+#resetScoresButton {
+    margin-top: 20px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#userBetActions div {
+    margin-top: 10px;
+}
+
+#userBetActions button {
+    margin: 0 20px;
 }
 
 .modal {
@@ -59,13 +138,16 @@ label {
     overflow: auto;
     background-color: rgb(0,0,0);
     background-color: rgba(0,0,0,0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .modal-content {
     background-color: #fefefe;
-    margin: 15% auto;
     padding: 20px;
     border: 1px solid #888;
     width: 80%;
     max-width: 300px;
+    text-align: center;
 }

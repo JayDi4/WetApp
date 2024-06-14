@@ -15,26 +15,54 @@ function addJogi() {
 
         users.push({ name: jogiName, score: 0, losses: {} });
         const jogiList = document.getElementById('jogiList');
-        const newJogiDiv = document.createElement('div');
-        newJogiDiv.textContent = jogiName;
+        const newItem = document.createElement('li');
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = jogiName;
+        
+        const editButton = document.createElement('button');
+        editButton.textContent = '🖉';
+        editButton.className = 'edit-button';
+        editButton.onclick = () => {
+            const newName = prompt('Neuer Name für ' + jogiName, jogiName);
+            if (newName && newName.trim() && !users.some(user => user.name === newName.trim())) {
+                updateUserNames(jogiName, newName.trim());
+                nameSpan.textContent = newName.trim();
+            } else {
+                alert('Ungültiger oder bereits vorhandener Name.');
+            }
+        };
 
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'x';
         deleteButton.className = 'delete-button';
         deleteButton.onclick = () => {
-            jogiList.removeChild(newJogiDiv);
+            jogiList.removeChild(newItem);
             users = users.filter(user => user.name !== jogiName);
             updateResultsTable();
         };
 
-        newJogiDiv.appendChild(deleteButton);
-        jogiList.appendChild(newJogiDiv);
+        newItem.appendChild(nameSpan);
+        newItem.appendChild(editButton);
+        newItem.appendChild(deleteButton);
+        jogiList.appendChild(newItem);
         jogiInput.value = '';
 
         document.getElementById('betSection').style.display = 'block';
     } else {
         alert('Bitte geben Sie einen Namen ein.');
     }
+}
+
+function updateUserNames(oldName, newName) {
+    users = users.map(user => {
+        if (user.name === oldName) {
+            user.name = newName;
+        }
+        return user;
+    });
+    updateResultsTable();
+    updateLossList();
 }
 
 function createNewBet() {
@@ -105,18 +133,20 @@ function displayUserBetActions() {
     const userBetActions = document.getElementById('userBetActions');
     userBetActions.innerHTML = '';
 
-    for (let jogiDiv of jogiList.children) {
-        const userName = jogiDiv.firstChild.textContent;
+    for (let item of jogiList.querySelectorAll('li')) {
+        const userName = item.querySelector('span').textContent;
         const userActionDiv = document.createElement('div');
         userActionDiv.textContent = userName + ': ';
 
         if (currentBetType === 'yesNo') {
             const yesButton = document.createElement('button');
             yesButton.textContent = 'Ja';
+            yesButton.style.marginRight = '5px';
             yesButton.onclick = () => handleYesNoClick(userName, 'Ja', yesButton, noButton);
 
             const noButton = document.createElement('button');
             noButton.textContent = 'Nein';
+            noButton.style.marginLeft = '5px';
             noButton.onclick = () => handleYesNoClick(userName, 'Nein', yesButton, noButton);
 
             userActionDiv.appendChild(yesButton);
