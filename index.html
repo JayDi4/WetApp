@@ -19,7 +19,7 @@
         <button id="yesNoButton" onclick="placeYesNoBet()" style="display: none;">Ja/Nein</button>
         <button id="estimateButton" onclick="placeEstimateBet()" style="display: none;">Schätzung</button>
     </div>
-    <div>
+    <div id="betDropdownContainer" style="display: none;">
         <select id="betDropdown" multiple style="width: 100%; margin-top: 20px;" onchange="selectBet()">
         </select>
     </div>
@@ -29,6 +29,7 @@
         <span id="resultActions"></span>
     </div>
     <div id="resultsTable" style="margin-top: 20px;"></div>
+    <button id="resetScoresButton" onclick="resetScores()" style="display: none;">Punkte Zurücksetzen</button>
     <script src="script.js"></script>
 </body>
 </html>

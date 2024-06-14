@@ -18,6 +18,7 @@ function addJogi() {
         deleteButton.onclick = () => {
             jogiList.removeChild(newJogiDiv);
             users = users.filter(user => user.name !== jogiName);
+            updateResultsTable();
         };
 
         newJogiDiv.appendChild(deleteButton);
@@ -72,10 +73,15 @@ function addBetToDropdown(bet, isYesNo) {
     if (!bets.some(b => b.text === bet)) {
         bets.push({ text: bet, isYesNo: isYesNo });
 
+        const betDropdownContainer = document.getElementById('betDropdownContainer');
         const betDropdown = document.getElementById('betDropdown');
         const newOption = document.createElement('option');
         newOption.textContent = bet;
         betDropdown.appendChild(newOption);
+        
+        if (betDropdown.options.length > 0) {
+            betDropdownContainer.style.display = 'block';
+        }
     }
 }
 
@@ -168,7 +174,7 @@ function displayResultActions() {
         resultInput.placeholder = 'Ergebnis eingeben';
         const confirmButton = document.createElement('button');
         confirmButton.textContent = '✓';
-        confirmButton.onclick = () => handleEstimateResultClick(resultInput);
+        confirmButton.onclick = () => handleEstimateResultClick(resultInput, confirmButton);
 
         resultActions.appendChild(resultInput);
         resultActions.appendChild(confirmButton);
@@ -189,7 +195,7 @@ function handleResultClick(result) {
     updateResultsTable();
 }
 
-function handleEstimateResultClick(resultInput) {
+function handleEstimateResultClick(resultInput, confirmButton) {
     const resultValue = parseFloat(resultInput.value.trim());
 
     let closestUser = null;
@@ -212,6 +218,9 @@ function handleEstimateResultClick(resultInput) {
         delete user.lastEstimate;
         return user;
     });
+
+    resultInput.disabled = true;
+    confirmButton.disabled = true;
 
     updateResultsTable();
 }
@@ -242,6 +251,21 @@ function updateResultsTable() {
     });
 
     resultsTable.appendChild(table);
+
+    if (users.length > 0) {
+        document.getElementById('resetScoresButton').style.display = 'block';
+    } else {
+        document.getElementById('resetScoresButton').style.display = 'none';
+    }
+}
+
+function resetScores() {
+    users = users.map(user => {
+        user.score = 0;
+        return user;
+    });
+
+    updateResultsTable();
 }
 
 function selectBet() {
