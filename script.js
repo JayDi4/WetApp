@@ -13,7 +13,7 @@ function addJogi() {
             return;
         }
 
-        users.push({ name: jogiName, score: 0 });
+        users.push({ name: jogiName, score: 0, losses: {} });
         const jogiList = document.getElementById('jogiList');
         const newJogiDiv = document.createElement('div');
         newJogiDiv.textContent = jogiName;
@@ -80,7 +80,7 @@ function placeEstimateBet() {
 
 function addBetToDropdown(bet, isYesNo) {
     if (!bets.some(b => b.text === bet)) {
-        bets.push({ text: bet, isYesNo: isYesNo });
+        bets.push({ text: bet, isYesNo: isYesNo, results: {} });
 
         const betDropdownContainer = document.getElementById('betDropdownContainer');
         const betDropdown = document.getElementById('betDropdown');
@@ -170,11 +170,17 @@ function displayResultActions() {
     if (currentBetType === 'yesNo') {
         const yesButton = document.createElement('button');
         yesButton.textContent = 'Ja';
-        yesButton.onclick = () => checkPendingVotes('Ja', yesButton);
+        yesButton.onclick = () => {
+            checkPendingVotes('Ja', yesButton);
+            disableResultButtons();
+        };
 
         const noButton = document.createElement('button');
         noButton.textContent = 'Nein';
-        noButton.onclick = () => checkPendingVotes('Nein', noButton);
+        noButton.onclick = () => {
+            checkPendingVotes('Nein', noButton);
+            disableResultButtons();
+        };
 
         resultActions.appendChild(yesButton);
         resultActions.appendChild(noButton);
@@ -188,11 +194,19 @@ function displayResultActions() {
         const confirmButton = document.createElement('button');
         confirmButton.textContent = '✓';
         confirmButton.disabled = true;
-        confirmButton.onclick = () => checkPendingVotes(resultInput, confirmButton);
+        confirmButton.onclick = () => {
+            checkPendingVotes(resultInput, confirmButton);
+            disableResultButtons();
+        };
 
         resultActions.appendChild(resultInput);
         resultActions.appendChild(confirmButton);
     }
+}
+
+function disableResultButtons() {
+    const buttons = document.querySelectorAll('#resultActions button');
+    buttons.forEach(button => button.disabled = true);
 }
 
 function checkPendingVotes(result, confirmButton) {
@@ -224,8 +238,13 @@ function handleResultClick(result, confirmButton) {
     if (currentBetType === 'yesNo') {
         users = users.map(user => {
             if (user.lastYesNo) {
-                if ((user.lastYesNo === 'Ja' && result === 'Nein') || (user.lastYesNo === 'Nein' && result === 'Ja')) {
+                const betResult = result === 'Ja' ? 'Nein' : 'Ja';
+                if (user.lastYesNo === betResult) {
                     user.score += 10;
+                    if (!user.losses[betResult]) {
+                        user.losses[betResult] = 0;
+                    }
+                    user.losses[betResult] += 10;
                 }
                 delete user.lastYesNo;
             }
@@ -250,6 +269,10 @@ function handleResultClick(result, confirmButton) {
         users = users.map(user => {
             if (user !== closestUser) {
                 user.score += 10;
+                if (!user.losses[result.value.trim()]) {
+                    user.losses[result.value.trim()] = 0;
+                }
+                user.losses[result.value.trim()] += 10;
             }
             delete user.lastEstimate;
             return user;
@@ -282,7 +305,7 @@ function updateResultsTable() {
         const nameCell = document.createElement('td');
         nameCell.textContent = user.name;
         const scoreCell = document.createElement('td');
-        scoreCell.textContent = (user.score / 10).toFixed(2) + ' €';
+        scoreCell.textContent = (user.score * 0.01).toFixed(2) + ' €';
         row.appendChild(nameCell);
         row.appendChild(scoreCell);
         table.appendChild(row);
@@ -302,39 +325,62 @@ function updateResultsTable() {
 function updateLossList() {
     const lossList = document.getElementById('lossList');
     lossList.innerHTML = '<h3>Verluste</h3>';
-    const lossEntries = users.map(user => {
-        const lossEntry = { name: user.name, totalLoss: 0 };
+    const table = document.createElement('table');
 
-        bets.forEach(bet => {
-            if (bet.isYesNo && user.lastYesNo) {
-                if ((user.lastYesNo === 'Ja' && bet.result === 'Nein') || (user.lastYesNo === 'Nein' && bet.result === 'Ja')) {
-                    lossEntry.totalLoss += 10;
-                }
-            } else if (!bet.isYesNo && user.lastEstimate !== undefined) {
-                if (Math.abs(user.lastEstimate - bet.result) > 0) {
-                    lossEntry.totalLoss += 10;
-                }
+    const headerRow = document.createElement('tr');
+    const betHeader = document.createElement('th');
+    betHeader.textContent = 'Wette';
+    const leastLossHeader = document.createElement('th');
+    leastLossHeader.textContent = 'Am wenigsten verloren';
+    const mostLossHeader = document.createElement('th');
+    mostLossHeader.textContent = 'Am meisten verloren';
+    headerRow.appendChild(betHeader);
+    headerRow.appendChild(leastLossHeader);
+    headerRow.appendChild(mostLossHeader);
+    table.appendChild(headerRow);
+
+    bets.forEach(bet => {
+        const betRow = document.createElement('tr');
+        const betCell = document.createElement('td');
+        betCell.textContent = bet.text;
+        const leastLossCell = document.createElement('td');
+        const mostLossCell = document.createElement('td');
+
+        let leastLossUser = null;
+        let mostLossUser = null;
+        let leastLoss = Infinity;
+        let mostLoss = -Infinity;
+
+        users.forEach(user => {
+            const loss = user.losses[bet.text] || 0;
+
+            if (loss < leastLoss) {
+                leastLoss = loss;
+                leastLossUser = user;
+            }
+
+            if (loss > mostLoss) {
+                mostLoss = loss;
+                mostLossUser = user;
             }
         });
 
-        return lossEntry;
+        leastLossCell.textContent = leastLossUser ? `${leastLossUser.name}: ${(leastLoss * 0.01).toFixed(2)} €` : 'N/A';
+        mostLossCell.textContent = mostLossUser ? `${mostLossUser.name}: ${(mostLoss * 0.01).toFixed(2)} €` : 'N/A';
+
+        betRow.appendChild(betCell);
+        betRow.appendChild(leastLossCell);
+        betRow.appendChild(mostLossCell);
+        table.appendChild(betRow);
     });
 
-    lossEntries.sort((a, b) => b.totalLoss - a.totalLoss);
-
-    const list = document.createElement('ul');
-    lossEntries.forEach(entry => {
-        const listItem = document.createElement('li');
-        listItem.textContent = `${entry.name}: ${(entry.totalLoss / 10).toFixed(2)} € verloren`;
-        list.appendChild(listItem);
-    });
-
-    lossList.appendChild(list);
+    lossList.appendChild(table);
 }
 
 function resetScores() {
     users = users.map(user => {
         user.score = 0;
+        user.losses = {};
         return user;
     });
 
