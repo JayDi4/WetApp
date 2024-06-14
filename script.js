@@ -1,6 +1,7 @@
 let bets = [];
 let users = [];
 let currentBetType = null;
+let pendingResultAction = null;
 
 function addJogi() {
     const jogiInput = document.getElementById('jogiInput');
@@ -24,6 +25,8 @@ function addJogi() {
         newJogiDiv.appendChild(deleteButton);
         jogiList.appendChild(newJogiDiv);
         jogiInput.value = '';
+
+        document.getElementById('betSection').style.display = 'block';
     } else {
         alert('Bitte geben Sie einen Namen ein.');
     }
@@ -35,6 +38,7 @@ function createNewBet() {
     document.getElementById('estimateButton').style.display = 'inline';
     document.getElementById('userBetActions').innerHTML = '';
     document.getElementById('resultActions').innerHTML = '';
+    document.getElementById('resultSection').style.display = 'none';
 }
 
 function placeYesNoBet() {
@@ -154,17 +158,18 @@ function handleEstimateClick(userName, estimateInput, confirmButton) {
 }
 
 function displayResultActions() {
+    document.getElementById('resultSection').style.display = 'block';
     const resultActions = document.getElementById('resultActions');
     resultActions.innerHTML = '';
 
     if (currentBetType === 'yesNo') {
         const yesButton = document.createElement('button');
         yesButton.textContent = 'Ja';
-        yesButton.onclick = () => handleResultClick('Ja');
+        yesButton.onclick = () => checkPendingVotes('Ja');
 
         const noButton = document.createElement('button');
         noButton.textContent = 'Nein';
-        noButton.onclick = () => handleResultClick('Nein');
+        noButton.onclick = () => checkPendingVotes('Nein');
 
         resultActions.appendChild(yesButton);
         resultActions.appendChild(noButton);
@@ -174,53 +179,76 @@ function displayResultActions() {
         resultInput.placeholder = 'Ergebnis eingeben';
         const confirmButton = document.createElement('button');
         confirmButton.textContent = '✓';
-        confirmButton.onclick = () => handleEstimateResultClick(resultInput, confirmButton);
+        confirmButton.onclick = () => checkPendingVotes(resultInput, confirmButton);
 
         resultActions.appendChild(resultInput);
         resultActions.appendChild(confirmButton);
     }
 }
 
-function handleResultClick(result) {
-    users = users.map(user => {
-        if (user.lastYesNo) {
-            if ((user.lastYesNo === 'Ja' && result === 'Nein') || (user.lastYesNo === 'Nein' && result === 'Ja')) {
-                user.score += 10;
-            }
-            delete user.lastYesNo;
-        }
-        return user;
-    });
+function checkPendingVotes(result, confirmButton) {
+    const pendingVotes = users.some(user => (currentBetType === 'yesNo' && !user.lastYesNo) || (currentBetType === 'estimate' && user.lastEstimate === undefined));
 
-    updateResultsTable();
+    if (pendingVotes) {
+        pendingResultAction = { result, confirmButton };
+        showWarningModal();
+    } else {
+        handleResultClick(result, confirmButton);
+    }
 }
 
-function handleEstimateResultClick(resultInput, confirmButton) {
-    const resultValue = parseFloat(resultInput.value.trim());
+function showWarningModal() {
+    document.getElementById('warningModal').style.display = 'block';
+}
 
-    let closestUser = null;
-    let closestDifference = Infinity;
+function closeWarningModal(continueAction) {
+    document.getElementById('warningModal').style.display = 'none';
 
-    users.forEach(user => {
-        if (user.lastEstimate !== undefined) {
-            const difference = Math.abs(user.lastEstimate - resultValue);
-            if (difference < closestDifference) {
-                closestDifference = difference;
-                closestUser = user;
+    if (continueAction && pendingResultAction) {
+        handleResultClick(pendingResultAction.result, pendingResultAction.confirmButton);
+    }
+
+    pendingResultAction = null;
+}
+
+function handleResultClick(result, confirmButton) {
+    if (currentBetType === 'yesNo') {
+        users = users.map(user => {
+            if (user.lastYesNo) {
+                if ((user.lastYesNo === 'Ja' && result === 'Nein') || (user.lastYesNo === 'Nein' && result === 'Ja')) {
+                    user.score += 10;
+                }
+                delete user.lastYesNo;
             }
-        }
-    });
+            return user;
+        });
+    } else if (currentBetType === 'estimate') {
+        const resultValue = parseFloat(result.value.trim());
 
-    users = users.map(user => {
-        if (user !== closestUser) {
-            user.score += 10;
-        }
-        delete user.lastEstimate;
-        return user;
-    });
+        let closestUser = null;
+        let closestDifference = Infinity;
 
-    resultInput.disabled = true;
-    confirmButton.disabled = true;
+        users.forEach(user => {
+            if (user.lastEstimate !== undefined) {
+                const difference = Math.abs(user.lastEstimate - resultValue);
+                if (difference < closestDifference) {
+                    closestDifference = difference;
+                    closestUser = user;
+                }
+            }
+        });
+
+        users = users.map(user => {
+            if (user !== closestUser) {
+                user.score += 10;
+            }
+            delete user.lastEstimate;
+            return user;
+        });
+
+        result.disabled = true;
+        confirmButton.disabled = true;
+    }
 
     updateResultsTable();
 }
