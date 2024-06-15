@@ -83,7 +83,7 @@ function updateUserList() {
         buttonContainer.className = 'button-container';
 
         const editButton = document.createElement('button');
-        editButton.textContent = '🖉';
+        editButton.textContent = 'bearbeiten';
         editButton.className = 'edit-button';
         editButton.onclick = () => {
             const newName = prompt('Neuer Name für ' + user.name, user.name);
