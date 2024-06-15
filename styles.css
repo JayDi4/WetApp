@@ -2,7 +2,7 @@ body {
     font-family: Arial, sans-serif;
     margin: 20px;
     text-align: center;
-    background-color: rgb(98, 188, 211);
+    background-color: rgb(190, 210, 218);
 }
 
 h1 {
@@ -41,14 +41,13 @@ button[disabled] {
 
 #jogiListContainer {
     margin-top: 20px;
-    display: flex;
     justify-content: center;
 }
 
 #jogiList {
     list-style: none;
     padding: 0;
-    width: 60%;
+    width: 20%;
     margin: 0 auto;
 }
 
@@ -56,9 +55,13 @@ button[disabled] {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px;
-    border: 1px solid #ddd;
+    padding: 5px;
     margin-bottom: 5px;
+}
+
+#jogiList li .button-container {
+    display: flex;
+    gap: 10px;
 }
 
 .bet-section {
@@ -151,4 +154,3 @@ th {
     max-width: 300px;
     text-align: center;
 }
-

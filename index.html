@@ -7,38 +7,38 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>WetApp </h1>
-    <div>
-        <input type="text" id="jogiInput" placeholder="neuer Jogi" title="neuer Jogi">
-        <button onclick="addJogi()">Jogi hinzufügen</button>
-    </div>
-    <div id="jogiListContainer">
-        <ul id="jogiList"></ul>
-    </div>
-    <div class="bet-section" id="betSection" style="display: none;">
-        <button onclick="createNewBet()">Neue Wette</button>
-        <input type="text" id="betInput" placeholder="Wette eingeben" title="Wette eingeben" style="display: none;">
-        <button id="yesNoButton" onclick="placeYesNoBet()" style="display: none;">Ja/Nein</button>
-        <button id="estimateButton" onclick="placeEstimateBet()" style="display: none;">Schätzung</button>
-    </div>
-    <div id="betDropdownContainer" style="display: none;">
-        <select id="betDropdown" multiple style="width: 100%;" onchange="selectBet()"></select>
-    </div>
-    <div id="userBetActions"></div>
-    <div id="resultSection" style="display: none;">
-        <label>Ergebnis: </label>
-        <span id="resultActions"></span>
-    </div>
-    <div id="resultsTable" style="margin-top: 20px;"></div>
-    <button id="resetScoresButton" onclick="resetScores()" style="display: none;">Punkte Zurücksetzen</button>
+<h1>WetApp </h1>
+<div>
+    <input type="text" id="jogiInput" placeholder="neuer Jogi" title="neuer Jogi">
+    <button onclick="addJogi()">Jogi hinzufügen</button>
+</div>
+<div id="jogiListContainer">
+    <ul id="jogiList"></ul>
+</div>
+<div class="bet-section" id="betSection" style="display: none;">
+    <button onclick="createNewBet()">Neue Wette</button>
+    <input type="text" id="betInput" placeholder="Wette eingeben" title="Wette eingeben" style="display: none;">
+    <button id="yesNoButton" onclick="placeYesNoBet()" style="display: none;">Ja/Nein</button>
+    <button id="estimateButton" onclick="placeEstimateBet()" style="display: none;">Schätzung</button>
+</div>
+<div id="betDropdownContainer" style="display: none;">
+    <select id="betDropdown" multiple style="width: 100%;" onchange="selectBet()"></select>
+</div>
+<div id="userBetActions"></div>
+<div id="resultSection" style="display: none;">
+    <label>Ergebnis: </label>
+    <span id="resultActions"></span>
+</div>
+<div id="resultsTable" style="margin-top: 20px;"></div>
+<button id="resetScoresButton" onclick="resetScores()" style="display: none;">Punkte Zurücksetzen</button>
 
-    <div id="warningModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <p>Noch nicht alle Benutzer haben abgestimmt. Möchten Sie trotzdem fortfahren?</p>
-            <button onclick="closeWarningModal(false)">Zurück</button>
-            <button onclick="closeWarningModal(true)">Trotzdem fortfahren</button>
-        </div>
+<div id="warningModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <p>Noch nicht alle Benutzer haben abgestimmt. Möchten Sie trotzdem fortfahren?</p>
+        <button onclick="closeWarningModal(false)">Zurück</button>
+        <button onclick="closeWarningModal(true)">Trotzdem fortfahren</button>
     </div>
-    <script src="script.js"></script>
+</div>
+<script src="script.js"></script>
 </body>
 </html>

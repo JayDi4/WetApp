@@ -13,14 +13,16 @@ function addJogi() {
             return;
         }
 
-
         users.push({ name: jogiName, score: 0 });
         const jogiList = document.getElementById('jogiList');
         const newItem = document.createElement('li');
 
         const nameSpan = document.createElement('span');
         nameSpan.textContent = jogiName;
-        
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'button-container';
+
         const editButton = document.createElement('button');
         editButton.textContent = '🖉';
         editButton.className = 'edit-button';
@@ -43,9 +45,11 @@ function addJogi() {
             updateResultsTable();
         };
 
+        buttonContainer.appendChild(editButton);
+        buttonContainer.appendChild(deleteButton);
+
         newItem.appendChild(nameSpan);
-        newItem.appendChild(editButton);
-        newItem.appendChild(deleteButton);
+        newItem.appendChild(buttonContainer);
         jogiList.appendChild(newItem);
         jogiInput.value = '';
 
@@ -74,7 +78,10 @@ function updateUserList() {
         const newItem = document.createElement('li');
         const nameSpan = document.createElement('span');
         nameSpan.textContent = user.name;
-        
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'button-container';
+
         const editButton = document.createElement('button');
         editButton.textContent = '🖉';
         editButton.className = 'edit-button';
@@ -97,9 +104,11 @@ function updateUserList() {
             updateResultsTable();
         };
 
+        buttonContainer.appendChild(editButton);
+        buttonContainer.appendChild(deleteButton);
+
         newItem.appendChild(nameSpan);
-        newItem.appendChild(editButton);
-        newItem.appendChild(deleteButton);
+        newItem.appendChild(buttonContainer);
         jogiList.appendChild(newItem);
     });
 }
@@ -154,7 +163,7 @@ function addBetToDropdown(bet, isYesNo) {
         const newOption = document.createElement('option');
         newOption.textContent = bet;
         betDropdown.appendChild(newOption);
-        
+
         if (betDropdown.options.length > 0) {
             betDropdownContainer.style.display = 'block';
         }
