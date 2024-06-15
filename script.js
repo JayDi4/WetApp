@@ -410,3 +410,14 @@ function selectBet() {
         displayResultActions();
     }
 }
+
+// Service Worker Registrierung
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
+            console.log('Service Worker registriert mit Scope:', registration.scope);
+        }, function(err) {
+            console.log('Service Worker Registrierung fehlgeschlagen:', err);
+        });
+    });
+}
