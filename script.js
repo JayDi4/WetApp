@@ -13,6 +13,7 @@ function addJogi() {
             return;
         }
 
+
         users.push({ name: jogiName, score: 0 });
         const jogiList = document.getElementById('jogiList');
         const newItem = document.createElement('li');
