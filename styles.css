@@ -1,5 +1,5 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: Copperplate, Fantasy;
     margin: 20px;
     text-align: center;
     background-color: rgb(190, 210, 218);
@@ -7,6 +7,7 @@ body {
 
 h1 {
     color: #333;
+    font-size: 50px;
 }
 
 input, select {
