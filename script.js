@@ -231,7 +231,11 @@ function handleEstimateClick(userName, estimateInput, confirmButton) {
     const estimateValue = estimateInput.value.trim();
     users = users.map(user => {
         if (user.name === userName) {
-            user.lastEstimate = parseFloat(estimateValue);
+            if (!isNaN(estimateValue)) {
+                user.lastEstimate = parseFloat(estimateValue);
+            } else {
+                user.lastEstimate = estimateValue;
+            }
         }
         return user;
     });
@@ -325,28 +329,35 @@ function handleResultClick(result, confirmButton) {
             return user;
         });
     } else if (currentBetType === 'estimate') {
-        const resultValue = parseFloat(result.value.trim());
+        const resultValue = result.value.trim();
+        const isResultNumeric = !isNaN(resultValue);
 
-        let closestUser = null;
-        let closestDifference = Infinity;
+        const numericCount = users.filter(user => typeof user.lastEstimate === 'number').length;
+        const stringCount = users.length - numericCount;
 
-        users.forEach(user => {
-            if (user.lastEstimate !== undefined) {
-                const difference = Math.abs(user.lastEstimate - resultValue);
-                if (difference < closestDifference) {
-                    closestDifference = difference;
-                    closestUser = user;
+        if (numericCount >= stringCount) {
+            const resultNumber = parseFloat(resultValue);
+            users.forEach(user => {
+                if (typeof user.lastEstimate === 'number') {
+                    if (user.lastEstimate !== resultNumber) {
+                        user.score += 10;
+                    }
+                } else {
+                    user.score += 10;
                 }
-            }
-        });
-
-        users = users.map(user => {
-            if (user !== closestUser) {
-                user.score += 10;
-            }
-            delete user.lastEstimate;
-            return user;
-        });
+            });
+        } else {
+            const resultString = resultValue.toLowerCase();
+            users.forEach(user => {
+                if (typeof user.lastEstimate === 'string') {
+                    if (user.lastEstimate.toLowerCase() !== resultString) {
+                        user.score += 10;
+                    }
+                } else {
+                    user.score += 10;
+                }
+            });
+        }
 
         result.disabled = true;
         confirmButton.disabled = true;
@@ -421,3 +432,50 @@ if ('serviceWorker' in navigator) {
         });
     });
 }
+
+const CACHE_NAME = 'wetapp-cache-v1';
+const urlsToCache = [
+    '/',
+    '/index.html',
+    '/styles.css',
+    '/script.js',
+    '/manifest.json',
+    '/icons/icon-192x192.png',
+    '/icons/icon-512x512.png'
+];
+
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => {
+                return cache.addAll(urlsToCache);
+            })
+    );
+});
+
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => {
+                if (response) {
+                    return response;
+                }
+                return fetch(event.request);
+            })
+    );
+});
+
+self.addEventListener('activate', event => {
+    const cacheWhitelist = [CACHE_NAME];
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cacheName => {
+                    if (cacheWhitelist.indexOf(cacheName) === -1) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+});
