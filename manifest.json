@@ -2,7 +2,7 @@
   "name": "WetApp",
   "short_name": "WetApp",
   "description": "Eine App zum Erstellen und Verwalten von Wetten",
-  "start_url": "/index.html",
+  "start_url": "/",
   "display": "fullscreen ",
   "background_color": "#62bcd3",
   "theme_color": "#62bcd3",
