@@ -1,73 +1,44 @@
-let bets = [];
-let users = [];
-let currentBetType = null;
-let pendingResultAction = null;
+const API_URL = 'https://wetappworker.diegel-josef.workers.dev/'; // Ersetzen Sie durch Ihre Worker-URL
 
-function addJogi() {
-    const jogiInput = document.getElementById('jogiInput');
-    const jogiName = jogiInput.value.trim();
+async function saveData() {
+    try {
+        const usersData = JSON.stringify(users);
+        const betsData = JSON.stringify(bets);
 
-    if (jogiName) {
-        if (users.some(user => user.name === jogiName)) {
-            alert('Benutzername bereits vorhanden.');
-            return;
-        }
+        await fetch(API_URL + 'users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: usersData,
+        });
 
-        users.push({ name: jogiName, score: 0 });
-        const jogiList = document.getElementById('jogiList');
-        const newItem = document.createElement('li');
-
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = jogiName;
-
-        const buttonContainer = document.createElement('div');
-        buttonContainer.className = 'button-container';
-
-        const editButton = document.createElement('button');
-        editButton.textContent = 'bearbeiten';
-        editButton.className = 'edit-button';
-        editButton.onclick = () => {
-            const newName = prompt('Neuer Name für ' + jogiName, jogiName);
-            if (newName && newName.trim() && !users.some(user => user.name === newName.trim())) {
-                updateUserNames(jogiName, newName.trim());
-                nameSpan.textContent = newName.trim();
-            } else {
-                alert('Ungültiger oder bereits vorhandener Name.');
-            }
-        };
-
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'x';
-        deleteButton.className = 'delete-button';
-        deleteButton.onclick = () => {
-            jogiList.removeChild(newItem);
-            users = users.filter(user => user.name !== jogiName);
-            updateResultsTable();
-        };
-
-        buttonContainer.appendChild(editButton);
-        buttonContainer.appendChild(deleteButton);
-
-        newItem.appendChild(nameSpan);
-        newItem.appendChild(buttonContainer);
-        jogiList.appendChild(newItem);
-        jogiInput.value = '';
-
-        document.getElementById('betSection').style.display = 'block';
-    } else {
-        alert('Bitte geben Sie einen Namen ein.');
+        await fetch(API_URL + 'bets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: betsData,
+        });
+    } catch (error) {
+        console.error('Fehler beim Speichern der Daten:', error);
     }
 }
 
-function updateUserNames(oldName, newName) {
-    users = users.map(user => {
-        if (user.name === oldName) {
-            user.name = newName;
+async function loadData() {
+    try {
+        const usersResponse = await fetch(API_URL + 'users');
+        if (usersResponse.ok) {
+            const savedUsers = await usersResponse.json();
+            users = savedUsers;
+            updateUserList();
         }
-        return user;
-    });
-    updateResultsTable();
-    updateUserList();
+
+        const betsResponse = await fetch(API_URL + 'bets');
+        if (betsResponse.ok) {
+            const savedBets = await betsResponse.json();
+            bets = savedBets;
+            updateBetDropdown();
+        }
+    } catch (error) {
+        console.error('Fehler beim Laden der Daten:', error);
+    }
 }
 
 function updateUserList() {
@@ -102,6 +73,7 @@ function updateUserList() {
             jogiList.removeChild(newItem);
             users = users.filter(u => u.name !== user.name);
             updateResultsTable();
+            saveData(); // Daten speichern
         };
 
         buttonContainer.appendChild(editButton);
@@ -111,6 +83,66 @@ function updateUserList() {
         newItem.appendChild(buttonContainer);
         jogiList.appendChild(newItem);
     });
+
+    if (users.length > 0) {
+        document.getElementById('betSection').style.display = 'block';
+    } else {
+        document.getElementById('betSection').style.display = 'none';
+    }
+}
+
+function updateBetDropdown() {
+    const betDropdown = document.getElementById('betDropdown');
+    betDropdown.innerHTML = '';
+
+    bets.forEach(bet => {
+        const newOption = document.createElement('option');
+        newOption.textContent = bet.text;
+        betDropdown.appendChild(newOption);
+    });
+
+    const betDropdownContainer = document.getElementById('betDropdownContainer');
+    if (betDropdown.options.length > 0) {
+        betDropdownContainer.style.display = 'block';
+    } else {
+        betDropdownContainer.style.display = 'none';
+    }
+}
+
+window.onload = function() {
+    loadData();
+}
+
+function addJogi() {
+    const jogiInput = document.getElementById('jogiInput');
+    const jogiName = jogiInput.value.trim();
+
+    if (jogiName) {
+        if (users.some(user => user.name === jogiName)) {
+            alert('Benutzername bereits vorhanden.');
+            return;
+        }
+
+        users.push({ name: jogiName, score: 0 });
+        updateUserList();
+        jogiInput.value = '';
+
+        saveData(); // Daten speichern
+    } else {
+        alert('Bitte geben Sie einen Namen ein.');
+    }
+}
+
+function updateUserNames(oldName, newName) {
+    users = users.map(user => {
+        if (user.name === oldName) {
+            user.name = newName;
+        }
+        return user;
+    });
+    updateResultsTable();
+    updateUserList();
+    saveData(); // Daten speichern
 }
 
 function createNewBet() {
@@ -133,6 +165,8 @@ function placeYesNoBet() {
         displayResultActions();
         betInput.value = '';
         hideBetInput();
+
+        saveData(); // Daten speichern
     } else {
         alert('Bitte geben Sie eine Wette ein.');
     }
@@ -149,6 +183,8 @@ function placeEstimateBet() {
         displayResultActions();
         betInput.value = '';
         hideBetInput();
+
+        saveData(); // Daten speichern
     } else {
         alert('Bitte geben Sie eine Wette ein.');
     }
@@ -156,7 +192,7 @@ function placeEstimateBet() {
 
 function addBetToDropdown(bet, isYesNo) {
     if (!bets.some(b => b.text === bet)) {
-        bets.push({ text: bet, isYesNo: isYesNo, results: {} });
+        bets.push({ text: bet, isYesNo: isYesNo });
 
         const betDropdownContainer = document.getElementById('betDropdownContainer');
         const betDropdown = document.getElementById('betDropdown');
@@ -365,6 +401,7 @@ function handleResultClick(result, confirmButton) {
 
     confirmButton.disabled = true;
     updateResultsTable();
+    saveData(); // Daten speichern
 }
 
 function updateResultsTable() {
@@ -408,6 +445,7 @@ function resetScores() {
     });
 
     updateResultsTable();
+    saveData(); // Daten speichern
 }
 
 function selectBet() {
@@ -421,61 +459,3 @@ function selectBet() {
         displayResultActions();
     }
 }
-
-// Service Worker Registrierung
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
-            console.log('Service Worker registriert mit Scope:', registration.scope);
-        }, function(err) {
-            console.log('Service Worker Registrierung fehlgeschlagen:', err);
-        });
-    });
-}
-
-const CACHE_NAME = 'wetapp-cache-v1';
-const urlsToCache = [
-    '/',
-    '/index.html',
-    '/styles.css',
-    '/script.js',
-    '/manifest.json',
-    '/icons/icon-192x192.png',
-    '/icons/icon-512x512.png'
-];
-
-self.addEventListener('install', event => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => {
-                return cache.addAll(urlsToCache);
-            })
-    );
-});
-
-self.addEventListener('fetch', event => {
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                if (response) {
-                    return response;
-                }
-                return fetch(event.request);
-            })
-    );
-});
-
-self.addEventListener('activate', event => {
-    const cacheWhitelist = [CACHE_NAME];
-    event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (cacheWhitelist.indexOf(cacheName) === -1) {
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
-    );
-});
