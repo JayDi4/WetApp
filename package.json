@@ -1,0 +1,16 @@
+{
+  "name": "wetapp",
+  "version": "1.0.0",
+  "description": "Eine App zum Erstellen und Verwalten von Wetten",
+  "main": "script.js",
+  "scripts": {
+    "dev": "live-server --port=8080 --entry-file=index.html",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "live-server": "^1.2.1"
+  }
+}
